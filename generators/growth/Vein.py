@@ -10,6 +10,7 @@ class Vein(object):
 		self._dead = False
 		self._name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
 		self._points = [ VeinPoint(start_location, sources, self._name) ]
+		self._before_last = 0;
 		self.sources = sources
 		self.growth_increase = growth_increase
 
@@ -25,9 +26,20 @@ class Vein(object):
 	def name(self):
 		return self._name
 
+	@property
+	def before_last(self) -> int:
+		return self._before_last
+	
+	@before_last.setter
+	def before_last(self, before_last):
+		self._before_last = before_last
+
 	@dead.setter
 	def dead(self, dead):
 		self._dead = dead
+
+	def get_root(self):
+		return self._points[0]
 
 	def get_tip(self):
 		return self._points[-1]

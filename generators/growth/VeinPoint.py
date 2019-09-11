@@ -9,6 +9,7 @@ class VeinPoint(object):
 		self.sources = sources
 		self._found_sources = []
 		self.for_vein = for_vein
+		self._cluster_vertex_index = None
 
 	@property
 	def location(self):
@@ -28,6 +29,14 @@ class VeinPoint(object):
 	def reset_found(self) -> None:
 		self._found_sources = []
 
+	@property
+	def cluster_vertex_index(self):
+		return self._cluster_vertex_index
+
+	@cluster_vertex_index.setter
+	def cluster_vertex_index(self, vertex_index: int) -> None:
+		self._cluster_vertex_index = vertex_index
+
 	def average_direction(self) -> Vector:
 		found_sources_count = len(self._found_sources);
 		if found_sources_count == 0:
@@ -38,7 +47,3 @@ class VeinPoint(object):
 			average_location.xyz += source.location.xyz
 		average_location.xyz /= found_sources_count;
 		return average_location
-
-	# Solidify edges? https://blender.stackexchange.com/questions/8300/how-to-solidify-edges
-	
-

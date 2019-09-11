@@ -1,5 +1,5 @@
 import bpy
-from .. generators.growth.BranchGrowth import BranchGrowth
+from .. generators.growth.VeinGrowth import VeinGrowth
 
 class DsGrowth_OT_Generate(bpy.types.Operator):
 	
@@ -15,7 +15,7 @@ class DsGrowth_OT_Generate(bpy.types.Operator):
 			dsgrowth_properties.particle_emitter in scene.objects:
 			start_object = scene.objects[dsgrowth_properties.growth_start]
 			emitter_object = scene.objects[dsgrowth_properties.particle_emitter]
-			BranchGrowth(start_object, emitter_object)
+			VeinGrowth(start_object, emitter_object)
 		else:
 			self.report({'ERROR'}, 'Select start and emitter')
 

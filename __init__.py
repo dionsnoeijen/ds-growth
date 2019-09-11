@@ -1,4 +1,6 @@
 
+# # Solidify edges? https://blender.stackexchange.com/questions/8300/how-to-solidify-edges
+
 bl_info = {
     "name": "DS - Growth",
     "author": "Dion Snoeijen <hallo@dionsnoeijen.nl>",
