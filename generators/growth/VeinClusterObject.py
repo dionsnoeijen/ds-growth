@@ -3,9 +3,10 @@ import bpy
 class VeinClusterObject(object):
 	'''This draws the cluster as a whole'''
 
-	def __init__(self):
+	def __init__(self, properties):
 		self._verts = []
 		self._lines = []
+		self.properties = properties
 
 	@property
 	def verts(self):
@@ -29,11 +30,28 @@ class VeinClusterObject(object):
 		vein_cluster = bpy.data.meshes.new(name)
 		vein_cluster_object = bpy.data.objects.new(name, vein_cluster)
 		bpy.context.collection.objects.link(vein_cluster_object)
+
 		vein_cluster.from_pydata(self._verts, self._lines, [])
 		vein_cluster.validate()
 
-		# vein_cluster_object.modifier_add(type='SKIN')
-		# vein_cluster_object.editmode_toggle()
-		# bpy.ops.mesh.select_all(action='SELECT')
-		# bpy.ops.transform.skin_resize(value=(0.1, 0.1, 0.1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-		# vein_cluster_object.editmode_toggle()
+		bpy.context.view_layer.objects.active = vein_cluster_object
+		bpy.ops.object.modifier_add(type='SKIN')
+		bpy.ops.object.editmode_toggle()
+		bpy.ops.mesh.select_all(action='SELECT')
+		bpy.ops.transform.skin_resize(
+			value=(
+				self.properties.skin_size,
+				self.properties.skin_size,
+				self.properties.skin_size
+			),
+			orient_type='GLOBAL',
+			orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
+			orient_matrix_type='GLOBAL',
+			mirror=True,
+			use_proportional_edit=False,
+			proportional_edit_falloff='SMOOTH',
+			proportional_size=1,
+			use_proportional_connected=False,
+			use_proportional_projected=False
+		)
+		bpy.ops.object.editmode_toggle()
