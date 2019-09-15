@@ -27,3 +27,27 @@ class DebugDraw:
 			location=location,
 			rotation=(0.0, 0.0, 0.0)
 		)
+
+	def try_ray_cast():
+		v_from = Vector((.9, -.2, .7))
+		v_to = Vector((.2, -.2, .1))
+
+		direction = v_to-v_from
+		direction.normalize()
+
+		bpy.ops.object.empty_add(location = v_from)
+		bpy.ops.object.empty_add(location = v_to)
+
+		cast_result = self.particle_emitter.ray_cast(
+			v_from,
+			direction
+		)
+
+		if cast_result[0]:
+			print('FOUND')
+			DebugDraw.draw_line_object([v_from, cast_result[1], v_to])
+		else:
+			print('NOT FOUND')
+			DebugDraw.draw_line_object([v_from, v_to])
+
+		print(cast_result)

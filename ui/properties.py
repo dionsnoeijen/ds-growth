@@ -21,6 +21,9 @@ class DsGrowthProperties(PropertyGroup):
 	stay_inside: BoolProperty(
 		name='Stay inside object'
 	)
+	draw_veins_individually: BoolProperty(
+		name='Draw veins individually'
+	)
 	iterations: IntProperty(
 		name='Iterations (temp)',
 		default=100,

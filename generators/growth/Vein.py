@@ -36,6 +36,8 @@ class Vein(object):
 
 	@dead.setter
 	def dead(self, dead):
+		for point in self._points:
+			point.dead = True
 		self._dead = dead
 
 	def get_root(self):
@@ -71,8 +73,8 @@ class Vein(object):
 			if direction is not None:
 				growth_vector = direction.xyz-tip.location.xyz
 				growth_vector.normalize()
-				growth_vector.xyz *= self.growth_increase
-				growth_vector.xyz += tip.location.xyz
+				growth_vector *= self.growth_increase
+				growth_vector += tip.location
 				self._points.append(VeinPoint(growth_vector, self.sources, self._name))
 			
 

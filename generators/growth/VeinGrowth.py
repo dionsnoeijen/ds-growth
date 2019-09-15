@@ -18,25 +18,27 @@ class VeinGrowth(object):
 		self._vein_cluster = VeinClusterObject(self.properties)
 		self._vein_cluster.add_vertex(self.growth_start.location)
 
-		# self.try_ray_cast()
+		# DebugDraw.try_ray_cast()
 		self.iteration = 0
 		for index in range(0, self.properties.iterations):
 			self.iteration = index
 			self.grow()
 
-		# Draw vein individually, this should be optional and not default behaviour
-		# self.draw_vein()
+		if self.properties.draw_veins_individually:
+			for vein in self.veins:
+				self.draw_vein(vein)
+		else:
+			self._vein_cluster.draw()
 
-		# Draw as cluster
-		self._vein_cluster.draw()
-
-	def reset_veins(self) -> None:
+	def reset_vein_point_sources(self) -> None:
 		for vein in self.veins:
 			if not vein.dead:
 				for point in vein.points:
 					point.reset_found()
 
-	def sources_find_closest_vein(self) -> None:
+	def sources_find_closest_vein_point(self) -> None:
+		# if self.iteration == 25:
+		# 	print('WTF')
 		for source_index,source in enumerate(self.sources.sources):
 			if not source.dead:
 				distance = 0
@@ -51,29 +53,31 @@ class VeinGrowth(object):
 							vector_between_source_and_point = point.location-source.location
 							direction = vector_between_source_and_point.normalized()
 							found_distance = vector_between_source_and_point.magnitude
-							inside = True
-							if self.properties.stay_inside:
+							if distance == 0:
+								distance = found_distance
+
+							ray_inside = True
+							if self.properties.stay_inside and not point.dead:
 								cast_result = self.particle_emitter.ray_cast(
 									source.location,
 									direction,
 									distance=found_distance
 								)
 								if cast_result[0] == True:
-									#if self.iteration == 42:
-										# print('LAST ITERATION!')
-										#DebugDraw.draw_line_object([source.location, cast_result[1], point.location])
-									inside = False
-							
-							if inside and vein_index == 0 and point_index == 0 \
-								or found_distance < distance:
-								distance = found_distance
-								closest_vein['vein_index'] = vein_index
-								closest_vein['point_index'] = point_index
-								closest_vein['source_index'] = source_index
+									ray_inside = False
+
+							if ray_inside and \
+								(vein_index == 0 and \
+								 point_index == 0 or \
+								 found_distance < distance):
+
+									distance = found_distance
+									closest_vein['vein_index'] = vein_index
+									closest_vein['point_index'] = point_index
+									closest_vein['source_index'] = source_index
 
 				if closest_vein['vein_index'] is not None:
 					if distance < self.properties.growth_increase:
-						# DebugDraw.draw_death_block(source.location)
 						source.dead = True
 					self.veins[closest_vein['vein_index']] \
 						.get_point(closest_vein['point_index']) \
@@ -88,9 +92,9 @@ class VeinGrowth(object):
 				if len(found) > 0:
 					new_vein = Vein(point.location, self.sources, self.properties.growth_increase)
 					# This happends when growth is from within
-					# the emitter, make sure it will be 0
+					# the emitter, make sure it will be before_last
 					if point.cluster_vertex_index == None:
-						new_vein.before_last = 0
+						new_vein.before_last = vein.before_last
 					else:
 						new_vein.before_last = point.cluster_vertex_index
 					new_point = new_vein.get_root()
@@ -98,6 +102,7 @@ class VeinGrowth(object):
 					self.veins.append(new_vein)
 			else:
 				if len(found) == 0:
+					# DebugDraw.draw_death_block(vein.get_tip().location)
 					vein.dead = True
 
 	def add_to_cluster(self, vein: Vein) -> None:
@@ -105,7 +110,8 @@ class VeinGrowth(object):
 		if tip.cluster_vertex_index == None:
 			line = [ vein.before_last ]
 			self._vein_cluster.add_vertex(tip.location)
-			tip.cluster_vertex_index = self._vein_cluster.last_vertex_index()
+			last_index = self._vein_cluster.last_vertex_index()
+			tip.cluster_vertex_index = last_index
 			line.append(tip.cluster_vertex_index)
 			vein.before_last = tip.cluster_vertex_index
 			self._vein_cluster.add_line(tuple(line))
@@ -115,44 +121,17 @@ class VeinGrowth(object):
 		vein.draw(0)
 
 	def grow(self) -> None:
-		self.reset_veins()
-		self.sources_find_closest_vein()
-
+		self.reset_vein_point_sources()
+		self.sources_find_closest_vein_point()
+		all_dead = True
 		for vein in self.veins:
 			if not vein.dead:
+				all_dead = False
 				self.try_create_new_vein(vein)
 				vein.grow()
-				self.add_to_cluster(vein)
+				if not self.properties.draw_veins_individually:
+					self.add_to_cluster(vein)
 
-		cluster_alive = False
-		for vein in self.veins:
-			if not vein.dead:
-				cluster_alive = True
+		if all_dead:
+			print('All dead at iteration: ', self.iteration)
 
-		if not cluster_alive:
-			print('ALL VEINS DEAD AT ITERATION', self.iteration)
-
-
-	def try_ray_cast(self):
-		v_from = Vector((.9, -.2, .7))
-		v_to = Vector((.2, -.2, .1))
-
-		direction = v_to-v_from
-		direction.normalize()
-
-		bpy.ops.object.empty_add(location = v_from)
-		bpy.ops.object.empty_add(location = v_to)
-
-		cast_result = self.particle_emitter.ray_cast(
-			v_from,
-			direction
-		)
-
-		if cast_result[0]:
-			print('FOUND')
-			DebugDraw.draw_line_object([v_from, cast_result[1], v_to])
-		else:
-			print('NOT FOUND')
-			DebugDraw.draw_line_object([v_from, v_to])
-
-		print(cast_result)

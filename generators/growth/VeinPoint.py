@@ -8,12 +8,21 @@ class VeinPoint(object):
 		self._location = location
 		self.sources = sources
 		self._found_sources = []
+		self._dead = False
 		self.for_vein = for_vein
 		self._cluster_vertex_index = None
 
 	@property
 	def location(self):
 		return self._location
+
+	@property
+	def dead(self):
+		return self._dead
+
+	@dead.setter
+	def dead(self, dead):
+		self._dead = dead
 
 	@property
 	def found_sources(self) -> list:
