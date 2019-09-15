@@ -71,7 +71,7 @@ class Vein(object):
 			tip = self.get_tip()
 			direction = tip.average_direction()
 			if direction is not None:
-				growth_vector = direction.xyz-tip.location.xyz
+				growth_vector = direction-tip.location
 				growth_vector.normalize()
 				growth_vector *= self.growth_increase
 				growth_vector += tip.location

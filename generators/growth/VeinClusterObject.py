@@ -30,9 +30,7 @@ class VeinClusterObject(object):
 		vein_cluster = bpy.data.meshes.new(name)
 		vein_cluster_object = bpy.data.objects.new(name, vein_cluster)
 		bpy.context.collection.objects.link(vein_cluster_object)
-
 		vein_cluster.from_pydata(self._verts, self._lines, [])
-		vein_cluster.validate()
 
 		bpy.context.view_layer.objects.active = vein_cluster_object
 		bpy.ops.object.modifier_add(type='SKIN')
