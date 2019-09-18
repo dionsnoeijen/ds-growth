@@ -32,12 +32,18 @@ class OBJECT_PT_DsGrowthGenerate(Panel):
 			layout.prop(dsgrowth_properties, 'iterations')
 			layout.separator()
 
+		layout.prop(dsgrowth_properties, 'vertex_only')
+		if not dsgrowth_properties.vertex_only:
+			layout.prop(dsgrowth_properties, 'skin_size')
+			layout.separator()
+
 		layout.prop(dsgrowth_properties, 'frame_by_frame')
-		# layout.prop(dsgrowth_properties, 'draw_veins_individually')
-		layout.prop(dsgrowth_properties, 'skin_size')
 		layout.prop(dsgrowth_properties, 'growth_increase')
 
 		layout.separator()
 		layout.operator("object.dsgrowth_generate")
+
+		# Maybe, sometime
+		# layout.prop(dsgrowth_properties, 'draw_veins_individually')
 
 

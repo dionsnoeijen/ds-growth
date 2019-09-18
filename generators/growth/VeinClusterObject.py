@@ -10,14 +10,14 @@ class VeinClusterObject(object):
 		self.properties = properties
 
 	@property
-	def verts(self):
+	def verts(self) -> list:
 		return self._verts
 
 	@property
-	def lines(self):
+	def lines(self) -> list:
 		return self._lines
 
-	def add_vertex(self, vert, iteration) -> None:
+	def add_vertex(self, vert, iteration: int) -> None:
 		self._verts.append(vert)
 		if iteration not in self._iterations:
 			self._iterations.update({iteration: []})
@@ -37,7 +37,7 @@ class VeinClusterObject(object):
 		)
 		bpy.ops.object.editmode_toggle()
 
-	def make_increase_width(self):
+	def make_increase_width(self) -> None:
 		size = self.properties.skin_size
 		obj = bpy.context.active_object
 		for iteration in self._iterations:
@@ -47,20 +47,22 @@ class VeinClusterObject(object):
 				obj.data.skin_vertices[''].data[vert_index].radius = (size, size)
 			size -= self.properties.width_increase
 
-	def draw(self):
+	def draw(self) -> None:
 		name = 'vein-cluster'
 		vein_cluster = bpy.data.meshes.new(name)
 		vein_cluster_object = bpy.data.objects.new(name, vein_cluster)
 		bpy.context.collection.objects.link(vein_cluster_object)
 		vein_cluster.from_pydata(self._verts, self._lines, [])
-		bpy.context.view_layer.objects.active = vein_cluster_object
-		bpy.ops.object.modifier_add(type='SKIN')
-		if self.properties.uniform_width:
-			self.make_uniform_width()
-		else:
-			self.make_increase_width()
-		bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Skin')
-		bpy.ops.object.modifier_add(type='SUBSURF')
-		bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Subdivision')
+
+		if not self.properties.vertex_only:
+			bpy.context.view_layer.objects.active = vein_cluster_object
+			bpy.ops.object.modifier_add(type='SKIN')
+			if self.properties.uniform_width:
+				self.make_uniform_width()
+			else:
+				self.make_increase_width()
+			bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Skin')
+			bpy.ops.object.modifier_add(type='SUBSURF')
+			bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Subdivision')
 
 		return vein_cluster_object

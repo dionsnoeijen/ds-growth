@@ -45,6 +45,11 @@ class DsGrowthProperties(PropertyGroup):
 		max=200,
 		min=1
 	)
+
+	vertex_only: BoolProperty(
+		name='Vertex only',
+		default=False
+	)
 	growth_increase: FloatProperty(
 		name='Growth increase',
 		default=0.1,
