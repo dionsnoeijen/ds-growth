@@ -23,9 +23,9 @@ bl_info = {
     "blender": (2, 80, 0),
     "location": "",
     "description": "Growing algorithm for particle systems",
-    "warning": "",
+    "warning": "This addon is in alpha",
     "wiki_url": "#",
-    "tracker_url": "#",
+    "tracker_url": "https://github.com/dionsnoeijen/ds-growth/issues",
     "category": "Mesh"
 }
 
@@ -47,6 +47,7 @@ classes = (
 )
 
 import bpy
+
 from bpy.props import PointerProperty
 
 def register():
