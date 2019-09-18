@@ -15,4 +15,6 @@ This is a Blender plugin that simulates branched growth towards particles. This 
 - [ ] Documentation.
 - [ ] Clean the code.
 - [ ] Object origin at cursor.
+- [ ] Add proper error handling for when wrong items are selected.
+- [ ] Maybe find a way to have it work on moving particles.
 - [x] Make option to have the vertex without skin.
