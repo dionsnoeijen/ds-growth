@@ -13,22 +13,34 @@ class VeinGrowth(object):
 		self.particle_emitter = particle_emitter
 		self.properties = properties
 		self.sources = Sources(self.particle_emitter)
-		self.veins = [ Vein(self.growth_start.location, self.sources, self.properties.growth_increase) ]
-
+		self.clusters = []
+		self.veins = [ Vein(
+			self.growth_start.location,
+			self.sources,
+			self.properties.growth_increase
+		) ]
+		self.stop = False
 		self._vein_cluster = VeinClusterObject(self.properties)
-		self._vein_cluster.add_vertex(self.growth_start.location)
+		self._vein_cluster.add_vertex(self.growth_start.location, 0)
+		self.start()
 
-		# DebugDraw.try_ray_cast()
+	def start(self):
 		self.iteration = 0
-		for index in range(0, self.properties.iterations):
-			self.iteration = index
-			self.grow()
+		if self.properties.autostop:
+			while not self.stop:
+				self.iteration+=1
+				self.grow()
+		else:
+			for index in range(0, self.properties.iterations):
+				self.iteration = index
+				self.grow()
 
 		if self.properties.draw_veins_individually:
 			for vein in self.veins:
 				self.draw_vein(vein)
 		else:
-			self._vein_cluster.draw()
+			if not self.properties.frame_by_frame:
+				self._vein_cluster.draw()
 
 	def reset_vein_point_sources(self) -> None:
 		for vein in self.veins:
@@ -37,8 +49,6 @@ class VeinGrowth(object):
 					point.reset_found()
 
 	def sources_find_closest_vein_point(self) -> None:
-		# if self.iteration == 25:
-		# 	print('WTF')
 		for source_index,source in enumerate(self.sources.sources):
 			if not source.dead:
 				distance = 0
@@ -53,6 +63,7 @@ class VeinGrowth(object):
 							vector_between_source_and_point = point.location-source.location
 							direction = vector_between_source_and_point.normalized()
 							found_distance = vector_between_source_and_point.magnitude
+
 							if distance == 0:
 								distance = found_distance
 
@@ -70,7 +81,6 @@ class VeinGrowth(object):
 								(vein_index == 0 and \
 								 point_index == 0 or \
 								 found_distance < distance):
-
 									distance = found_distance
 									closest_vein['vein_index'] = vein_index
 									closest_vein['point_index'] = point_index
@@ -102,14 +112,13 @@ class VeinGrowth(object):
 					self.veins.append(new_vein)
 			else:
 				if len(found) == 0:
-					# DebugDraw.draw_death_block(vein.get_tip().location)
 					vein.dead = True
 
 	def add_to_cluster(self, vein: Vein) -> None:
 		tip = vein.get_tip()
 		if tip.cluster_vertex_index == None:
 			line = [ vein.before_last ]
-			self._vein_cluster.add_vertex(tip.location)
+			self._vein_cluster.add_vertex(tip.location, self.iteration)
 			last_index = self._vein_cluster.last_vertex_index()
 			tip.cluster_vertex_index = last_index
 			line.append(tip.cluster_vertex_index)
@@ -117,12 +126,37 @@ class VeinGrowth(object):
 			self._vein_cluster.add_line(tuple(line))
 
 	def draw_vein(self, vein: Vein) -> None:
-		'''This will draw the vein as an indivudual object'''
+		'''This will draw the vein as an individual object'''
 		vein.draw(0)
+
+	def draw_for_animation(self) -> None:
+
+		vein_cluster = self._vein_cluster.draw()
+
+		vein_cluster.hide_render = True
+		vein_cluster.hide_viewport = True
+		vein_cluster.keyframe_insert(data_path="hide_render", frame=1)
+		vein_cluster.keyframe_insert(data_path="hide_viewport", frame=1)
+		vein_cluster.hide_render = False
+		vein_cluster.hide_viewport = False
+		vein_cluster.keyframe_insert(data_path="hide_render", frame=self.iteration)
+		vein_cluster.keyframe_insert(data_path="hide_viewport", frame=self.iteration)
+
+		for cluster in self.clusters:
+			if cluster.hide_render != True and \
+				cluster.hide_viewport != True:
+
+				cluster.hide_render = True
+				cluster.hide_viewport = True
+				cluster.keyframe_insert(data_path="hide_render", frame=self.iteration)
+				cluster.keyframe_insert(data_path="hide_viewport", frame=self.iteration)
+
+		self.clusters.append(vein_cluster)
 
 	def grow(self) -> None:
 		self.reset_vein_point_sources()
 		self.sources_find_closest_vein_point()
+
 		all_dead = True
 		for vein in self.veins:
 			if not vein.dead:
@@ -132,6 +166,11 @@ class VeinGrowth(object):
 				if not self.properties.draw_veins_individually:
 					self.add_to_cluster(vein)
 
+		if self.properties.frame_by_frame:
+			self.draw_for_animation()
+
 		if all_dead:
 			print('All dead at iteration: ', self.iteration)
+			if self.properties.autostop:
+				self.stop = True
 

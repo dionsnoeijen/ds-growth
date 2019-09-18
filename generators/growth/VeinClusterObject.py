@@ -6,6 +6,7 @@ class VeinClusterObject(object):
 	def __init__(self, properties):
 		self._verts = []
 		self._lines = []
+		self._iterations = {}
 		self.properties = properties
 
 	@property
@@ -16,8 +17,11 @@ class VeinClusterObject(object):
 	def lines(self):
 		return self._lines
 
-	def add_vertex(self, vert) -> None:
+	def add_vertex(self, vert, iteration) -> None:
 		self._verts.append(vert)
+		if iteration not in self._iterations:
+			self._iterations.update({iteration: []})
+		self._iterations[iteration].append(len(self._verts)-1)
 
 	def last_vertex_index(self) -> int:
 		return len(self._verts) - 1
@@ -25,31 +29,38 @@ class VeinClusterObject(object):
 	def add_line(self, line) -> None:
 		self._lines.append(line)
 
+	def make_uniform_width(self) -> None:
+		bpy.ops.object.editmode_toggle()
+		bpy.ops.mesh.select_all(action='SELECT')
+		bpy.ops.transform.skin_resize(
+			value=( self.properties.skin_size, self.properties.skin_size, self.properties.skin_size )
+		)
+		bpy.ops.object.editmode_toggle()
+
+	def make_increase_width(self):
+		size = self.properties.skin_size
+		obj = bpy.context.active_object
+		for iteration in self._iterations:
+			size += self.properties.width_increase
+		for iteration in self._iterations:
+			for vert_index in self._iterations[iteration]:
+				obj.data.skin_vertices[''].data[vert_index].radius = (size, size)
+			size -= self.properties.width_increase
+
 	def draw(self):
 		name = 'vein-cluster'
 		vein_cluster = bpy.data.meshes.new(name)
 		vein_cluster_object = bpy.data.objects.new(name, vein_cluster)
 		bpy.context.collection.objects.link(vein_cluster_object)
 		vein_cluster.from_pydata(self._verts, self._lines, [])
-
 		bpy.context.view_layer.objects.active = vein_cluster_object
 		bpy.ops.object.modifier_add(type='SKIN')
-		bpy.ops.object.editmode_toggle()
-		bpy.ops.mesh.select_all(action='SELECT')
-		bpy.ops.transform.skin_resize(
-			value=(
-				self.properties.skin_size,
-				self.properties.skin_size,
-				self.properties.skin_size
-			),
-			orient_type='GLOBAL',
-			orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)),
-			orient_matrix_type='GLOBAL',
-			mirror=True,
-			use_proportional_edit=False,
-			proportional_edit_falloff='SMOOTH',
-			proportional_size=1,
-			use_proportional_connected=False,
-			use_proportional_projected=False
-		)
-		bpy.ops.object.editmode_toggle()
+		if self.properties.uniform_width:
+			self.make_uniform_width()
+		else:
+			self.make_increase_width()
+		bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Skin')
+		bpy.ops.object.modifier_add(type='SUBSURF')
+		bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Subdivision')
+
+		return vein_cluster_object
