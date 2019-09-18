@@ -2,6 +2,8 @@
 
 This is a Blender plugin that simulates branched growth towards particles. This version is still in alpha.
 
+![Example](https://raw.githubusercontent.com/dionsnoeijen/ds-growth/master/growth.gif)
+
 ### Things I'm still working on:
 
 - [ ] Make better geometry. (ak, find and fix bugs)
