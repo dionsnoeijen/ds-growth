@@ -35,7 +35,10 @@ class DsGrowth_OT_Generate(bpy.types.Operator):
 			start_object = scene.objects[dsgrowth_properties.growth_start]
 			emitter_object = scene.objects[dsgrowth_properties.particle_emitter]
 			# Add new VeinGrowth instance for every start_object
-			VeinGrowth(start_object, emitter_object, dsgrowth_properties)
+			try:
+				VeinGrowth(start_object, emitter_object, dsgrowth_properties)
+			except ValueError as exception:
+				self.report({'ERROR'}, str(exception))
 		else:
 			self.report({'ERROR'}, 'Select start and emitter')
 

@@ -83,4 +83,10 @@ class VeinClusterObject(object):
 			bpy.ops.object.modifier_add(type='SUBSURF')
 			bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Subdivision')
 
+
+			# bpy.ops.material.new()
+			# bpy.context.object.active_material_index = 1
+			# bpy.context.object.active_material.name = "Something"
+
+
 		return vein_cluster_object

@@ -27,12 +27,16 @@ class Sources(object):
 		self.determine_sources()
 
 	@property
-	def sources(self):
+	def sources(self) -> list:
 		return self._sources
 
-	def determine_sources(self):
+	def determine_sources(self) -> None:
 		depsgraph = bpy.context.evaluated_depsgraph_get()
 		eval_ob = self.particle_emitter.evaluated_get(depsgraph)
-		particle_system = eval_ob.particle_systems[0]
-		for particle in particle_system.particles:
-			self._sources.append(Source(particle.location))
+
+		if eval_ob.particle_systems and eval_ob.particle_systems[0]:
+			particle_system = eval_ob.particle_systems[0]
+			for particle in particle_system.particles:
+				self._sources.append(Source(particle.location))
+		else:
+			raise ValueError('There is no particle system found on the object')
