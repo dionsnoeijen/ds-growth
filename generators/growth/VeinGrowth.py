@@ -21,6 +21,7 @@ import bpy
 from . Sources import Sources
 from . Vein import Vein
 from . VeinClusterObject import VeinClusterObject
+from . Material import Material
 from .. DebugDraw import DebugDraw
 from mathutils import Vector
 
@@ -37,8 +38,9 @@ class VeinGrowth(object):
 			self.sources,
 			self.properties.growth_increase
 		) ]
+		self.material = Material()
 		self.stop = False
-		self._vein_cluster = VeinClusterObject(self.properties)
+		self._vein_cluster = VeinClusterObject(self.properties, self.material)
 		self._vein_cluster.add_vertex(self.growth_start.location, 0)
 		self.start()
 

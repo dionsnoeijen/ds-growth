@@ -18,14 +18,17 @@
 
 import bpy
 
+from . Material import Material
+
 class VeinClusterObject(object):
 	'''This draws the cluster as a whole'''
 
-	def __init__(self, properties):
+	def __init__(self, properties, material: Material):
 		self._verts = []
 		self._lines = []
 		self._iterations = {}
 		self.properties = properties
+		self.material = material
 
 	@property
 	def verts(self) -> list:
@@ -71,10 +74,10 @@ class VeinClusterObject(object):
 		vein_cluster_object = bpy.data.objects.new(name, vein_cluster)
 		bpy.context.collection.objects.link(vein_cluster_object)
 		vein_cluster.from_pydata(self._verts, self._lines, [])
-
 		if not self.properties.vertex_only:
 			bpy.context.view_layer.objects.active = vein_cluster_object
 			bpy.ops.object.modifier_add(type='SKIN')
+			bpy.ops.object.shade_smooth()
 			if self.properties.uniform_width:
 				self.make_uniform_width()
 			else:
@@ -82,11 +85,8 @@ class VeinClusterObject(object):
 			bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Skin')
 			bpy.ops.object.modifier_add(type='SUBSURF')
 			bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Subdivision')
-
-
-			# bpy.ops.material.new()
-			# bpy.context.object.active_material_index = 1
-			# bpy.context.object.active_material.name = "Something"
-
+			for poly in bpy.context.object.data.polygons:
+				poly.use_smooth = True
+			vein_cluster_object.data.materials.append(self.material.material)
 
 		return vein_cluster_object

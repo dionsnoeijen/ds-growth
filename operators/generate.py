@@ -27,7 +27,7 @@ class DsGrowth_OT_Generate(bpy.types.Operator):
 	bl_description = "Start the growth process"
 	bl_options = {'REGISTER', 'UNDO'}
 
-	def execute (self, context):
+	def execute (self, context) -> None:
 		scene = context.scene
 		dsgrowth_properties = scene.dsgrowth_properties
 		if dsgrowth_properties.growth_start in scene.objects and \
