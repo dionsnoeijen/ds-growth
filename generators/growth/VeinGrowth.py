@@ -27,11 +27,20 @@ from mathutils import Vector
 
 class VeinGrowth(object):
 
-	def __init__(self, growth_start, particle_emitter, properties):
+	def __init__(
+		self,
+		growth_start,
+		particle_emitter,
+		properties,
+		report,
+		sources
+	):
 		self.growth_start = growth_start
 		self.particle_emitter = particle_emitter
 		self.properties = properties
-		self.sources = Sources(self.particle_emitter)
+		self.report = report
+		self.sources = sources
+
 		self.clusters = []
 		self.veins = [ Vein(
 			self.growth_start.location,
@@ -39,9 +48,11 @@ class VeinGrowth(object):
 			self.properties.growth_increase
 		) ]
 		self.material = Material()
+
 		self.stop = False
 		self._vein_cluster = VeinClusterObject(self.properties, self.material)
 		self._vein_cluster.add_vertex(self.growth_start.location, 0)
+
 		self.start()
 
 	def start(self):
@@ -109,6 +120,7 @@ class VeinGrowth(object):
 				if closest_vein['vein_index'] is not None:
 					if distance < self.properties.growth_increase:
 						source.dead = True
+						DebugDraw.draw_death_block(source.location)
 					self.veins[closest_vein['vein_index']] \
 						.get_point(closest_vein['point_index']) \
 						.add_found_source(closest_vein['source_index'])
@@ -120,13 +132,23 @@ class VeinGrowth(object):
 			found = point.found_sources
 			if point_index != tip_index:
 				if len(found) > 0:
-					new_vein = Vein(point.location, self.sources, self.properties.growth_increase)
+					new_vein = Vein(
+						point.location,
+						self.sources,
+						self.properties.growth_increase
+					)
 					# This happends when growth is from within
 					# the emitter, make sure it will be before_last
 					if point.cluster_vertex_index == None:
-						new_vein.before_last = vein.before_last
+						# This fixes the first two branches stat will connect
+						# wrong at the base. I don't know why this happends though
+						if vein.before_last == 1 or vein.before_last == 2:
+							new_vein.before_last = 0
+						else:
+							new_vein.before_last = vein.before_last
 					else:
 						new_vein.before_last = point.cluster_vertex_index
+
 					new_point = new_vein.get_root()
 					new_point.found_sources = found
 					self.veins.append(new_vein)
@@ -147,7 +169,7 @@ class VeinGrowth(object):
 
 	def draw_vein(self, vein: Vein) -> None:
 		'''This will draw the vein as an individual object'''
-		vein.draw(0)
+		vein.draw()
 
 	def draw_for_animation(self) -> None:
 
@@ -191,6 +213,7 @@ class VeinGrowth(object):
 
 		if all_dead:
 			print('All dead at iteration: ', self.iteration)
+			self.report.report({'INFO'}, 'All dead at iteration: %s' % (self.iteration))
 			if self.properties.autostop:
 				self.stop = True
 

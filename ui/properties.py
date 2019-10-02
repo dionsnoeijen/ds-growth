@@ -79,3 +79,7 @@ class DsGrowthProperties(PropertyGroup):
 		default=0.0005,
 		max=1
 	)
+	apply_modifiers: BoolProperty(
+		default=False,
+		name='Apply modifiers'
+	)

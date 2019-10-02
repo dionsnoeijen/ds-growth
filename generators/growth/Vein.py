@@ -28,7 +28,8 @@ class Vein(object):
 		self._dead = False
 		self._name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
 		self._points = [ VeinPoint(start_location, sources, self._name) ]
-		self._before_last = 0;
+		self._before_last = 0
+		self._directions = []
 		self.sources = sources
 		self.growth_increase = growth_increase
 
@@ -89,6 +90,15 @@ class Vein(object):
 			tip = self.get_tip()
 			direction = tip.average_direction()
 			if direction is not None:
+				# Fix the growth of straight lines towards single
+				# left out sources on the other side of the object
+				if direction in self._directions:
+					if len(tip.found_sources) == 1:
+						source_index = tip.last_found_source_index()
+						self.sources.sources[source_index].dead = True
+				else:
+					self._directions.append(direction)
+				
 				growth_vector = direction-tip.location
 				growth_vector.normalize()
 				growth_vector *= self.growth_increase

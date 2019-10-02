@@ -56,6 +56,9 @@ class VeinPoint(object):
 	def reset_found(self) -> None:
 		self._found_sources = []
 
+	def last_found_source_index(self) -> int:
+		return self._found_sources[-1]
+
 	@property
 	def cluster_vertex_index(self):
 		return self._cluster_vertex_index

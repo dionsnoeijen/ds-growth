@@ -52,6 +52,7 @@ class OBJECT_PT_DsGrowthGenerate(Panel):
 
 		layout.prop(dsgrowth_properties, 'vertex_only')
 		if not dsgrowth_properties.vertex_only:
+			layout.prop(dsgrowth_properties, 'apply_modifiers')
 			layout.prop(dsgrowth_properties, 'skin_size')
 			layout.separator()
 

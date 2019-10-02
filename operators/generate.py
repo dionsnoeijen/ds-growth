@@ -19,6 +19,7 @@
 import bpy
 
 from .. generators.growth.VeinGrowth import VeinGrowth
+from .. generators.growth.Sources import Sources
 
 class DsGrowth_OT_Generate(bpy.types.Operator):
 	
@@ -36,7 +37,17 @@ class DsGrowth_OT_Generate(bpy.types.Operator):
 			emitter_object = scene.objects[dsgrowth_properties.particle_emitter]
 			# Add new VeinGrowth instance for every start_object
 			try:
-				VeinGrowth(start_object, emitter_object, dsgrowth_properties)
+				VeinGrowth(
+					start_object,
+					emitter_object,
+					dsgrowth_properties,
+					self,
+					Sources(
+						emitter_object,
+						dsgrowth_properties.growth_increase,
+						self
+					)
+				)
 			except ValueError as exception:
 				self.report({'ERROR'}, str(exception))
 		else:
